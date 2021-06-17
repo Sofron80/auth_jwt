@@ -1,5 +1,25 @@
+const nodemailer = require("nodemailer");
 class MailService {
-  async sendActivationMail(email, link) {}
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+  }
+  async sendActivationMail(email, link) {
+    await this.transporter.sendMail({
+      from: '"auth_JWT" <auth_JWT@gmail.com>',
+      to: email,
+      subject: "Hello ✔",
+      text: "Hello world?",
+      html: `<a href='http://localhost:5000/api/activate/${link}'>Подтвердить ссылку</a>`,
+    });
+  }
 }
 
 module.exports = new MailService();
