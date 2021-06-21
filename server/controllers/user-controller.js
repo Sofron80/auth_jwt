@@ -1,51 +1,79 @@
-const userService = require("../service/user-service");
+const { validationResult } = require('express-validator')
+const UserDto = require('../dtos/user-dto')
+const ApiError = require('../exceptions/api-error')
+const userModel = require('../models/user-model')
+const userService = require('../service/user-service')
 
-class UsewrController {
+class UserController {
   async registration(req, res, next) {
     try {
-      const { email, password } = req.body;
-      const userData = await userService.registration(email, password);
-      res.cookie("refreshToken", userData.refreshToken, {
+      const errors = validationResult(req)
+      if (!errors.isEmpty()) {
+        return next(ApiError.BadRequest('Ошибка валидации', errors.array()))
+      }
+      const { email, password } = req.body
+      const userData = await userService.registration(email, password)
+      res.cookie('refreshToken', userData.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-      });
-      return res.json(userData);
+        httpOnly: true
+      })
+      return res.json(userData)
     } catch (e) {
-      console.log(e);
+      next(e)
     }
   }
 
   async login(req, res, next) {
     try {
-      res.json(["login", "426"]);
-    } catch (e) {}
+      const { email, password } = req.body
+      const userData = await userService.login(email, password)
+      res.cookie('refreshToken', userData.refreshToken, {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true
+      })
+      return res.json(userData)
+    } catch (e) {
+      next(e)
+    }
   }
 
   async logout(req, res, next) {
     try {
-      res.json(["logout", "426"]);
-    } catch (e) {}
+      res.json(['logout', '426'])
+    } catch (e) {
+      next(e)
+    }
   }
 
   async activate(req, res, next) {
     try {
-      res.json(["activate", req.params]);
-    } catch (e) {}
+      const activationlink = req.params.link || ''
+      await userService.activate(activationlink)
+      return res.redirect(process.env.CLIENT_URL)
+    } catch (e) {
+      next(e)
+    }
   }
 
   async refresh(req, res, next) {
     try {
-      res.json(["refresh", "426"]);
-    } catch (e) {}
+      res.json(['refresh', '426'])
+    } catch (e) {
+      next(e)
+    }
   }
 
   async getUsers(req, res, next) {
     try {
-      res.json(["123", "426"]);
+      let users = await userModel.find({})
+      users = users.map((u) => {
+        return UserDto(u)
+      })
+      return res.json(users)
     } catch (e) {
-      console.log(e);
+      next(e)
     }
   }
 }
 
-module.exports = new UsewrController();
+module.exports = new UserController()

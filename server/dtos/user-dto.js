@@ -1,11 +1,9 @@
-module.exports = class UserDto {
-  email;
-  id;
-  isActivated;
-
-  constructor(model) {
-    this.email = model.email;
-    this.id = model._id;
-    this.isActivated = model.isActivated;
-  }
+const UserDto = ({ email, id, isActivated }) => {
+  return {
+    email,
+    id,
+    isActivated,
+  };
 };
+
+module.exports = UserDto;

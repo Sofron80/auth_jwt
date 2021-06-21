@@ -13,11 +13,16 @@ class MailService {
   }
   async sendActivationMail(email, link) {
     await this.transporter.sendMail({
-      from: '"auth_JWT" <auth_JWT@gmail.com>',
+      from: process.env.SMTP_USER,
       to: email,
-      subject: "Hello ✔",
-      text: "Hello world?",
-      html: `<a href='http://localhost:5000/api/activate/${link}'>Подтвердить ссылку</a>`,
+      subject: `Активация аккаунта на ${process.env.API_URL}`,
+      text: "",
+      html: `
+        <div>
+          <h1>Для активации перейдите по ссыле</h1>
+          <a href='${link}'>Подтвердить ссылку</a>
+        </div>
+      `,
     });
   }
 }
